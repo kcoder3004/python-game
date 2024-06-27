@@ -10,6 +10,7 @@ def show_instructions():
       inventory
       look
       talk [npc]
+      use [item]
     """)
 
 def show_status():
@@ -35,6 +36,20 @@ def talk_to_npc(npc):
                 print(f'{npcs[npc]["name"]}: Can you please bring me a {npcs[npc]["item"]}?')
     else:
         print("You can't talk to that.")
+
+def use_item(item):
+    if item in inventory:
+        if item == "map" and current_room["name"] == "Library":
+            print("Using the map, you find a hidden door leading to a Secret Room.")
+            rooms["Library"]["north"] = "Secret Room"
+        elif item == "key" and current_room["name"] == "Garden":
+            print("Using the key, you unlock the gate to freedom. YOU WIN!")
+            return True
+        else:
+            print(f"You can't use the {item} here.")
+    else:
+        print(f"You don't have a {item}.")
+    return False
 
 # An inventory, which is initially empty
 inventory = []
@@ -99,6 +114,11 @@ rooms = {
         'description': 'You are in the library. There is a door to the west.',
         'west': 'Kitchen',
         'item': 'book'
+    },
+    'Secret Room': {
+        'name': 'Secret Room',
+        'description': 'You have discovered a secret room filled with treasures.',
+        'item': 'treasure'
     }
 }
 
@@ -155,12 +175,16 @@ while True:
         else:
             print(f'There is no {move[1]} here to talk to.')
     
+    # If they type 'use' first
+    if move[0] == 'use':
+        if use_item(move[1]):
+            break
+    
     # Player loses if they enter a room with a monster
     if 'item' in current_room and current_room['item'] == 'monster':
         print('A monster has got you... GAME OVER!')
         break
     
-    # Player wins if they get to the Garden with a key and a potion
+    # Player wins if they get to the Garden with a key and a potion and use the key
     if current_room['name'] == 'Garden' and 'key' in inventory and 'potion' in inventory:
-        print('You escaped the house... YOU WIN!')
-        break
+        print('You have the key and the potion, now use the key to unlock the gate and escape.')
